@@ -8,7 +8,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+		"lint:md": "markdownlint 'specs/**/*.md' 'templates/*.md'",
+    "lint:openapi": "spectral lint 'specs/**/*.{yaml,yml,json}' -r .spectral.yaml"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
