@@ -1,43 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl, Modal } from 'react-native';
 import { Observation, ObservationType } from '../types';
-import { ObservationService } from '../services/ObservationService';
+import { ObservationForm } from '../components/ObservationForm';
+import { useObservations } from '../hooks/useObservations';
+import { useFocusEffect } from '@react-navigation/native';
 
 export const ObservationsScreen: React.FC = () => {
-  const [observations, setObservations] = useState<Observation[]>([]);
+  const { observations, isLoading, refresh } = useObservations();
   const [selectedType, setSelectedType] = useState<ObservationType | 'all'>('all');
-  const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showObservationForm, setShowObservationForm] = useState(false);
 
-  useEffect(() => {
-    loadObservations();
-  }, []);
-
-  const loadObservations = async () => {
-    try {
-      setIsLoading(true);
-      // For now, we'll simulate loading observations
-      // In full implementation, this would call DatabaseService methods
-      setObservations([]);
-    } catch (error) {
-      console.error('Failed to load observations:', error);
-      Alert.alert('Error', 'Failed to load observations');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Refresh observations when screen becomes focused
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadObservations();
+    await refresh();
     setRefreshing(false);
   };
 
   const handleCreateObservation = () => {
-    Alert.alert('Create Observation', 'This will open the observation form', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Create', onPress: () => console.log('Navigate to observation form') }
-    ]);
+    setShowObservationForm(true);
+  };
+
+  const handleObservationSave = (observation: Observation) => {
+    setShowObservationForm(false);
+    // The observation is already saved and the hook will refresh the list
+    refresh(); // Refresh to show the new observation
+    Alert.alert('Success', 'Observation saved successfully!');
+  };
+
+  const handleObservationCancel = () => {
+    setShowObservationForm(false);
   };
 
   const handleObservationPress = (observation: Observation) => {
@@ -173,6 +172,18 @@ export const ObservationsScreen: React.FC = () => {
       <TouchableOpacity style={styles.fab} onPress={handleCreateObservation}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
+
+      <Modal
+        visible={showObservationForm}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleObservationCancel}
+      >
+        <ObservationForm
+          onSave={handleObservationSave}
+          onCancel={handleObservationCancel}
+        />
+      </Modal>
     </View>
   );
 };

@@ -36,14 +36,15 @@ describe('Notification Integration Tests', () => {
 
       const result = await notificationManager.scheduleBellNotifications(schedule);
 
-      expect(result.limitations.platformLimit).toBeLessThanOrEqual(64);
+      // Platform limit should be either 64 (iOS) or 500 (other platforms)
+      expect([64, 500]).toContain(result.limitations.platformLimit);
     });
   });
 
   describe('notification handling', () => {
     it('should handle notification responses', async () => {
       const mockNotificationResponse = {
-        identifier: 'test-bell-123',
+        identifier: 'bell-123', // Must start with 'bell-' prefix
         actionIdentifier: 'acknowledge',
         userText: 'Quick observation note'
       };

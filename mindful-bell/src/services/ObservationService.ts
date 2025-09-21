@@ -127,10 +127,17 @@ export class ObservationService {
     const limit = options.limit || 20;
     const offset = options.offset || 0;
     
-    // This would be implemented with a proper query method in DatabaseService
-    // For now, we'll create a placeholder implementation
-    const observations: Observation[] = [];
-    const total = 0;
+    // Call the DatabaseService to get observations
+    const result = await this.db.getObservations({
+      limit,
+      offset,
+      type: options.type,
+      dateFrom: options.dateFrom,
+      dateTo: options.dateTo
+    });
+    
+    const observations = result.observations;
+    const total = result.totalCount;
     
     const executionTimeMs = Date.now() - startTime;
     

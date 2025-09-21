@@ -13,9 +13,14 @@ if (Platform.OS !== 'web') {
 }
 
 export class DatabaseService {
-  private db: any = null;
+  private db: any;
   private static instance: DatabaseService;
-  private isWeb = Platform.OS === 'web';
+  private isWeb: boolean;
+  private mockObservations: Observation[] = []; // Mock storage for web
+
+  constructor() {
+    this.isWeb = Platform.OS === 'web';
+  }
 
   public static getInstance(): DatabaseService {
     if (!DatabaseService.instance) {
@@ -223,6 +228,56 @@ export class DatabaseService {
     return this.mapRowToObservation(result);
   }
 
+  public async getObservations(options: {
+    limit?: number;
+    offset?: number;
+    type?: string[];
+    dateFrom?: Date;
+    dateTo?: Date;
+  } = {}): Promise<{ observations: Observation[]; totalCount: number }> {
+    if (this.isWeb) {
+      return this.mockGetObservations(options);
+    }
+    
+    if (!this.db) throw new Error('Database not initialized');
+
+    const { limit = 20, offset = 0, type, dateFrom, dateTo } = options;
+    
+    let whereClause = 'WHERE deleted_at IS NULL';
+    const params: any[] = [];
+    
+    if (type && type.length > 0) {
+      whereClause += ` AND type IN (${type.map(() => '?').join(',')})`;
+      params.push(...type);
+    }
+    
+    if (dateFrom) {
+      whereClause += ' AND created_at >= ?';
+      params.push(dateFrom.toISOString());
+    }
+    
+    if (dateTo) {
+      whereClause += ' AND created_at <= ?';
+      params.push(dateTo.toISOString());
+    }
+    
+    const observations = await this.db.getAllAsync(`
+      SELECT * FROM observations 
+      ${whereClause}
+      ORDER BY created_at DESC 
+      LIMIT ? OFFSET ?
+    `, [...params, limit, offset]);
+    
+    const countResult = await this.db.getFirstAsync(`
+      SELECT COUNT(*) as count FROM observations ${whereClause}
+    `, params);
+    
+    return {
+      observations: observations.map(this.mapRowToObservation.bind(this)),
+      totalCount: countResult.count
+    };
+  }
+
   public async insertBellEvent(bellEvent: Omit<BellEvent, 'id'>): Promise<BellEvent> {
     if (this.isWeb) {
       return this.mockInsertBellEvent(bellEvent);
@@ -379,6 +434,8 @@ export class DatabaseService {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+    // Store in mock storage
+    this.mockObservations.push(mockObservation);
     console.log('Mock: Created observation', mockObservation);
     return mockObservation;
   }
@@ -410,6 +467,46 @@ export class DatabaseService {
       tags: ['mock'],
       createdAt: new Date(),
       updatedAt: new Date(),
+    };
+  }
+
+  private async mockGetObservations(options: {
+    limit?: number;
+    offset?: number;
+    type?: string[];
+    dateFrom?: Date;
+    dateTo?: Date;
+  } = {}): Promise<{ observations: Observation[]; totalCount: number }> {
+    const { limit = 20, offset = 0, type, dateFrom, dateTo } = options;
+    
+    // Debug: console.log(`Mock: mockObservations array has ${this.mockObservations.length} items`);
+    let filteredObservations = [...this.mockObservations];
+    
+    // Apply type filter
+    if (type && type.length > 0) {
+      filteredObservations = filteredObservations.filter(obs => type.includes(obs.type));
+    }
+    
+    // Apply date filters
+    if (dateFrom) {
+      filteredObservations = filteredObservations.filter(obs => obs.createdAt >= dateFrom);
+    }
+    
+    if (dateTo) {
+      filteredObservations = filteredObservations.filter(obs => obs.createdAt <= dateTo);
+    }
+    
+    // Sort by creation date (newest first)
+    filteredObservations.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    // Apply pagination
+    const paginatedObservations = filteredObservations.slice(offset, offset + limit);
+    
+    console.log(`Mock: Retrieved ${paginatedObservations.length} observations (total: ${filteredObservations.length})`);
+    
+    return {
+      observations: paginatedObservations,
+      totalCount: filteredObservations.length
     };
   }
 

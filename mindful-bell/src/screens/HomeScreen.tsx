@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
-import { BellEvent } from '../types';
+import { BellEvent, Observation } from '../types';
 import { BellSchedulerService } from '../services/BellSchedulerService';
 import { DatabaseService } from '../services/DatabaseService';
 import { ObservationForm } from '../components/ObservationForm';
+import { router } from 'expo-router';
 
 export const HomeScreen: React.FC = () => {
   const [nextBell, setNextBell] = useState<BellEvent | null>(null);
@@ -48,9 +49,35 @@ export const HomeScreen: React.FC = () => {
     setShowObservationForm(true);
   };
 
-  const handleObservationSave = () => {
+  const handleObservationSave = (observation: Observation) => {
     setShowObservationForm(false);
-    Alert.alert('Success', 'Observation saved successfully!');
+    
+    // Show success feedback with navigation option
+    Alert.alert(
+      'Success', 
+      `Observation saved successfully!\n\nType: ${observation.type}\nContent: ${observation.content.substring(0, 50)}...`,
+      [
+        {
+          text: 'Stay Here',
+          style: 'cancel'
+        },
+        {
+          text: 'View Observations',
+          onPress: () => {
+            try {
+              // Navigate to observations screen
+              router.push('/(tabs)/observations');
+            } catch (error) {
+              console.error('Navigation failed:', error);
+              // Fallback: show message that observation was saved
+              Alert.alert('Note', 'Observation saved! You can view it in the Observations tab.');
+            }
+          }
+        }
+      ]
+    );
+    
+    console.log('Observation saved from HomeScreen:', observation);
   };
 
   const handleObservationCancel = () => {
