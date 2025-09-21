@@ -210,9 +210,9 @@ Contributors will be recognized in:
 
 ## ❓ Questions?
 
-- **General questions**: Start a [discussion](https://github.com/your-username/mindfulness-bell/discussions)
-- **Bug reports**: Create an [issue](https://github.com/your-username/mindfulness-bell/issues)
-- **Feature ideas**: Create an [issue](https://github.com/your-username/mindfulness-bell/issues) with the "enhancement" label
+- **General questions**: Start a [discussion](https://github.com/ikhanhmai/mindfulness-bell/discussions)
+- **Bug reports**: Create an [issue](https://github.com/ikhanhmai/mindfulness-bell/issues)
+- **Feature ideas**: Create an [issue](https://github.com/ikhanhmai/mindfulness-bell/issues) with the "enhancement" label
 
 ## 📄 License
 
