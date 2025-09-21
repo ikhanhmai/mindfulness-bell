@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(do if [ -d \"$dir\" ])",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(for dir in */)",
+      "Bash(do echo \"=== $dir ===\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

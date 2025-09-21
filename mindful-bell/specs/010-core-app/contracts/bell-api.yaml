@@ -1,0 +1,351 @@
+openapi: 3.0.0
+info:
+  title: Mindful Bell Core App API
+  version: 1.0.0
+  description: Local API contracts for the mindful bell app core functionality
+
+paths:
+  /bells/schedule:
+    post:
+      summary: Generate daily bell schedule
+      operationId: generateBellSchedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+                density:
+                  type: string
+                  enum: [low, medium, high]
+                activeWindows:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TimeWindow'
+                quietHours:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TimeWindow'
+              required: [date, density, activeWindows]
+      responses:
+        '200':
+          description: Bell schedule generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  schedule:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BellEvent'
+
+  /bells/{id}/acknowledge:
+    post:
+      summary: Acknowledge a bell notification
+      operationId: acknowledgeBell
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bell acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BellEvent'
+
+  /entries:
+    get:
+      summary: List observation entries
+      operationId: listEntries
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [desire, fear, affliction, lesson]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: List of entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Entry'
+
+    post:
+      summary: Create new observation entry
+      operationId: createEntry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntryCreate'
+      responses:
+        '201':
+          description: Entry created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+
+  /entries/{id}:
+    get:
+      summary: Get specific entry
+      operationId: getEntry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Entry details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+
+    put:
+      summary: Update entry
+      operationId: updateEntry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntryUpdate'
+      responses:
+        '200':
+          description: Entry updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+
+    delete:
+      summary: Delete entry
+      operationId: deleteEntry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Entry deleted
+
+  /settings:
+    get:
+      summary: Get app settings
+      operationId: getSettings
+      responses:
+        '200':
+          description: Current settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+
+    put:
+      summary: Update app settings
+      operationId: updateSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettingsUpdate'
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+
+  /stats:
+    get:
+      summary: Get practice statistics
+      operationId: getStats
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: week
+      responses:
+        '200':
+          description: Practice statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+
+components:
+  schemas:
+    TimeWindow:
+      type: object
+      properties:
+        start:
+          type: string
+          format: time
+          example: "09:00"
+        end:
+          type: string
+          format: time
+          example: "17:00"
+      required: [start, end]
+
+    BellEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        scheduledTime:
+          type: string
+          format: date-time
+        acknowledgedAt:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum: [scheduled, triggered, acknowledged, missed]
+      required: [id, scheduledTime, status]
+
+    Entry:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [desire, fear, affliction, lesson]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, type, content, createdAt, updatedAt]
+
+    EntryCreate:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [desire, fear, affliction, lesson]
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+      required: [type, content]
+
+    EntryUpdate:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+      required: [content]
+
+    Settings:
+      type: object
+      properties:
+        activeWindows:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeWindow'
+        quietHours:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeWindow'
+        bellDensity:
+          type: string
+          enum: [low, medium, high]
+        soundEnabled:
+          type: boolean
+        vibrationEnabled:
+          type: boolean
+        soundFile:
+          type: string
+          nullable: true
+      required: [activeWindows, bellDensity, soundEnabled, vibrationEnabled]
+
+    SettingsUpdate:
+      type: object
+      properties:
+        activeWindows:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeWindow'
+        quietHours:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeWindow'
+        bellDensity:
+          type: string
+          enum: [low, medium, high]
+        soundEnabled:
+          type: boolean
+        vibrationEnabled:
+          type: boolean
+        soundFile:
+          type: string
+          nullable: true
+
+    Stats:
+      type: object
+      properties:
+        period:
+          type: string
+          enum: [day, week, month]
+        bellsScheduled:
+          type: integer
+        bellsAcknowledged:
+          type: integer
+        acknowledgeRate:
+          type: number
+          format: float
+        entriesCreated:
+          type: integer
+        entriesByType:
+          type: object
+          properties:
+            desire:
+              type: integer
+            fear:
+              type: integer
+            affliction:
+              type: integer
+            lesson:
+              type: integer
+      required: [period, bellsScheduled, bellsAcknowledged, acknowledgeRate, entriesCreated, entriesByType]

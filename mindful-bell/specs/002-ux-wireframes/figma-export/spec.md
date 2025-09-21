@@ -25,3 +25,15 @@ Focus is on simplicity, calming UI, and offline-first interaction.
 - [ ] Onboarding completes in ≤3 steps.
 - [ ] Quick capture available from Home and from Bell.
 - [ ] All flows reachable within 2–3 taps.
+
+## Design Vibe Guidelines
+- Calming, supportive, and non-judgmental.
+- Neutral backgrounds with pastel green/blue accents.
+- Rounded corners, generous white space, large tap targets.
+- Typography: clean sans-serif, legible, not too dense.
+- Empty/error states use gentle copy: “Take a breath, nothing here yet.”
+- **Liquid-glass vibe inspired by Apple:**
+  - Translucent backgrounds with subtle blur.
+  - Layered cards with depth and frosted-glass effect.
+  - Soft shadows and highlights to create floating elements.
+  - Gentle motion/animations (fade, slide) instead of harsh transitions.
