@@ -30,7 +30,7 @@ export class NotificationManager {
   private db: DatabaseService;
   private isInitialized: boolean = false;
 
-  private constructor() {
+  constructor() {
     this.db = DatabaseService.getInstance();
   }
 

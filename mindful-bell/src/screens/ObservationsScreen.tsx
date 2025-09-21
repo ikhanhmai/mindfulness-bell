@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Observation, ObservationType } from '../types';
-import { DatabaseService } from '../services/DatabaseService';
+import { ObservationService } from '../services/ObservationService';
 
 export const ObservationsScreen: React.FC = () => {
   const [observations, setObservations] = useState<Observation[]>([]);

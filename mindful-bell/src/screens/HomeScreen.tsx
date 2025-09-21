@@ -64,7 +64,7 @@ export const HomeScreen: React.FC = () => {
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
     if (hours > 0) {
-      return `${hours}h ${minutes}m`;
+      return `${hours}h ${minutes}m Let's begin your mindful journeys`;
     }
     return `${minutes}m`;
   };
@@ -100,7 +100,7 @@ export const HomeScreen: React.FC = () => {
       </View>
 
       <View style={styles.statsSection}>
-        <Text style={styles.statsTitle}>Today's Schedule</Text>
+        <Text style={styles.statsTitle}>Today&apos;s Schedule</Text>
         <Text style={styles.statsText}>{todaysBells.length} bells planned</Text>
       </View>
 

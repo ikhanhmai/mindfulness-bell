@@ -1,9 +1,21 @@
-import * as SQLite from 'expo-sqlite';
+import { Platform } from 'react-native';
 import { Observation, BellEvent, Settings } from '../types';
 
+// Conditionally import SQLite only on native platforms
+let SQLite: any = null;
+if (Platform.OS !== 'web') {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    SQLite = require('expo-sqlite');
+  } catch (error) {
+    console.warn('SQLite not available:', error);
+  }
+}
+
 export class DatabaseService {
-  private db: SQLite.SQLiteDatabase | null = null;
+  private db: any = null;
   private static instance: DatabaseService;
+  private isWeb = Platform.OS === 'web';
 
   public static getInstance(): DatabaseService {
     if (!DatabaseService.instance) {
@@ -13,6 +25,10 @@ export class DatabaseService {
   }
 
   public async initialize(): Promise<void> {
+    if (this.isWeb) {
+      console.log('DatabaseService initialized for web (mock mode)');
+      return;
+    }
     this.db = await SQLite.openDatabaseAsync('mindful_bell.db');
     await this.createTables();
     await this.runMigrations();
@@ -139,6 +155,9 @@ export class DatabaseService {
   }
 
   public async insertObservation(observation: Omit<Observation, 'id' | 'createdAt' | 'updatedAt'>): Promise<Observation> {
+    if (this.isWeb) {
+      return this.mockInsertObservation(observation);
+    }
     if (!this.db) throw new Error('Database not initialized');
 
     const id = this.generateUUID();
@@ -166,6 +185,9 @@ export class DatabaseService {
   }
 
   public async updateObservation(id: string, updates: Partial<Observation>): Promise<Observation> {
+    if (this.isWeb) {
+      return this.mockUpdateObservation(id, updates);
+    }
     if (!this.db) throw new Error('Database not initialized');
 
     const now = new Date().toISOString();
@@ -187,6 +209,9 @@ export class DatabaseService {
   }
 
   public async getObservationById(id: string): Promise<Observation> {
+    if (this.isWeb) {
+      return this.mockGetObservationById(id);
+    }
     if (!this.db) throw new Error('Database not initialized');
 
     const result = await this.db.getFirstAsync<any>(`
@@ -199,6 +224,9 @@ export class DatabaseService {
   }
 
   public async insertBellEvent(bellEvent: Omit<BellEvent, 'id'>): Promise<BellEvent> {
+    if (this.isWeb) {
+      return this.mockInsertBellEvent(bellEvent);
+    }
     if (!this.db) throw new Error('Database not initialized');
 
     const id = this.generateUUID();
@@ -218,6 +246,9 @@ export class DatabaseService {
   }
 
   public async getSettings(): Promise<Settings> {
+    if (this.isWeb) {
+      return this.mockGetSettings();
+    }
     if (!this.db) throw new Error('Database not initialized');
 
     let result = await this.db.getFirstAsync<any>(`
@@ -256,6 +287,9 @@ export class DatabaseService {
   }
 
   public async updateSettings(updates: Partial<Settings>): Promise<Settings> {
+    if (this.isWeb) {
+      return this.mockUpdateSettings(updates);
+    }
     if (!this.db) throw new Error('Database not initialized');
 
     const now = new Date().toISOString();
@@ -333,7 +367,90 @@ export class DatabaseService {
     });
   }
 
-  public getDatabase(): SQLite.SQLiteDatabase | null {
+  public getDatabase(): any {
     return this.db;
+  }
+
+  // Web mock implementations
+  private async mockInsertObservation(observation: Omit<Observation, 'id' | 'createdAt' | 'updatedAt'>): Promise<Observation> {
+    const mockObservation: Observation = {
+      id: this.generateUUID(),
+      ...observation,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    console.log('Mock: Created observation', mockObservation);
+    return mockObservation;
+  }
+
+  private async mockUpdateObservation(id: string, updates: Partial<Observation>): Promise<Observation> {
+    const mockObservation: Observation = {
+      id,
+      type: 'lesson',
+      content: 'Mock observation',
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...updates,
+    };
+    console.log('Mock: Updated observation', mockObservation);
+    return mockObservation;
+  }
+
+  private async mockGetObservationById(id: string): Promise<Observation> {
+    return {
+      id,
+      type: 'lesson',
+      content: 'Mock observation content',
+      tags: ['mock'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  }
+
+  private async mockInsertBellEvent(event: Omit<BellEvent, 'id'>): Promise<BellEvent> {
+    const mockEvent: BellEvent = {
+      id: this.generateUUID(),
+      ...event,
+    };
+    console.log('Mock: Created bell event', mockEvent);
+    return mockEvent;
+  }
+
+  private async mockGetTodaysBellEvents(): Promise<BellEvent[]> {
+    const now = new Date();
+    return [
+      {
+        id: '1',
+        scheduledTime: new Date(now.getTime() + 30 * 60 * 1000),
+        status: 'scheduled',
+      },
+      {
+        id: '2', 
+        scheduledTime: new Date(now.getTime() + 2 * 60 * 60 * 1000),
+        status: 'scheduled',
+      },
+    ];
+  }
+
+  private async mockGetSettings(): Promise<Settings> {
+    return {
+      id: 'default',
+      activeWindows: [{ start: '09:00', end: '17:00' }],
+      quietHours: [{ start: '22:00', end: '07:00' }],
+      bellDensity: 'medium',
+      soundEnabled: true,
+      vibrationEnabled: true,
+      updatedAt: new Date(),
+    };
+  }
+
+  private async mockUpdateSettings(updates: Partial<Settings>): Promise<Settings> {
+    const currentSettings = await this.mockGetSettings();
+    return {
+      ...currentSettings,
+      ...updates,
+      updatedAt: new Date(),
+    };
   }
 }

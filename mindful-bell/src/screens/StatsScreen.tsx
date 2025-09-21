@@ -193,7 +193,7 @@ export const StatsScreen: React.FC = () => {
           <View style={styles.insightContent}>
             <Text style={styles.insightTitle}>Growth Pattern</Text>
             <Text style={styles.insightText}>
-              You're capturing more lessons than fears this {selectedPeriod}.
+              You&apos;re capturing more lessons than fears this {selectedPeriod}.
               This suggests growing mindful awareness.
             </Text>
           </View>

@@ -1,4 +1,4 @@
-import { BellEvent, BellDensity, TimeWindow, GenerateScheduleRequest, ValidateScheduleParamsRequest, ValidateScheduleParamsResponse } from '../types';
+import { BellEvent, BellDensity, TimeWindow, ValidateScheduleParamsRequest, ValidateScheduleParamsResponse } from '../types';
 
 export class BellSchedulerService {
   private static instance: BellSchedulerService;
@@ -121,8 +121,8 @@ export class BellSchedulerService {
     }));
   }
 
-  private createTimeSlots(date: Date, activeWindows: TimeWindow[], quietHours: TimeWindow[]): Array<{start: Date, end: Date}> {
-    const slots: Array<{start: Date, end: Date}> = [];
+  private createTimeSlots(date: Date, activeWindows: TimeWindow[], quietHours: TimeWindow[]): {start: Date, end: Date}[] {
+    const slots: {start: Date, end: Date}[] = [];
 
     for (const window of activeWindows) {
       const startTime = this.createDateFromTimeString(date, window.start);
@@ -174,7 +174,7 @@ export class BellSchedulerService {
     return slots.filter(slot => slot.end.getTime() - slot.start.getTime() > 0);
   }
 
-  private removeTimeAroundBell(timeSlots: Array<{start: Date, end: Date}>, bellTime: Date, intervalMinutes: number): void {
+  private removeTimeAroundBell(timeSlots: {start: Date, end: Date}[], bellTime: Date, intervalMinutes: number): void {
     const intervalMs = intervalMinutes * 60 * 1000;
     const bufferStart = new Date(bellTime.getTime() - intervalMs);
     const bufferEnd = new Date(bellTime.getTime() + intervalMs);

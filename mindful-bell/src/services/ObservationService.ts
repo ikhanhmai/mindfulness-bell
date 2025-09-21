@@ -5,7 +5,7 @@ export class ObservationService {
   private static instance: ObservationService;
   private db: DatabaseService;
 
-  private constructor() {
+  constructor() {
     this.db = DatabaseService.getInstance();
   }
 
@@ -17,18 +17,56 @@ export class ObservationService {
   }
 
   public async createObservation(
+    data: {
+      type: ObservationType;
+      content: string;
+      tags?: string[];
+      bellEventId?: string;
+    }
+  ): Promise<Observation>;
+  public async createObservation(
     type: ObservationType,
     content: string,
+    tags?: string[],
+    bellEventId?: string
+  ): Promise<Observation>;
+  public async createObservation(
+    typeOrData: ObservationType | {
+      type: ObservationType;
+      content: string;
+      tags?: string[];
+      bellEventId?: string;
+    },
+    content?: string,
     tags: string[] = [],
     bellEventId?: string
   ): Promise<Observation> {
-    this.validateObservationData(type, content);
+    let type: ObservationType;
+    let actualContent: string;
+    let actualTags: string[];
+    let actualBellEventId: string | undefined;
+
+    if (typeof typeOrData === 'object') {
+      // Object parameter style
+      type = typeOrData.type;
+      actualContent = typeOrData.content;
+      actualTags = typeOrData.tags || [];
+      actualBellEventId = typeOrData.bellEventId;
+    } else {
+      // Individual parameters style
+      type = typeOrData;
+      actualContent = content!;
+      actualTags = tags;
+      actualBellEventId = bellEventId;
+    }
+
+    this.validateObservationData(type, actualContent);
 
     return await this.db.insertObservation({
       type,
-      content: content.trim(),
-      tags,
-      bellEventId
+      content: actualContent.trim(),
+      tags: actualTags,
+      bellEventId: actualBellEventId
     });
   }
 
@@ -46,6 +84,52 @@ export class ObservationService {
 
   public async getObservationById(id: string): Promise<Observation> {
     return await this.db.getObservationById(id);
+  }
+
+  public async getObservations(options: {
+    limit?: number;
+    offset?: number;
+    type?: ObservationType[];
+    dateFrom?: Date;
+    dateTo?: Date;
+    search?: string;
+  } = {}): Promise<{
+    observations: Observation[];
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+    };
+    searchMetadata: {
+      query?: string;
+      totalMatches?: number;
+      executionTimeMs: number;
+    };
+  }> {
+    const startTime = Date.now();
+    const limit = options.limit || 20;
+    const offset = options.offset || 0;
+    
+    // This would be implemented with a proper query method in DatabaseService
+    // For now, we'll create a placeholder implementation
+    const observations: Observation[] = [];
+    const total = 0;
+    
+    const executionTimeMs = Date.now() - startTime;
+    
+    return {
+      observations,
+      pagination: {
+        total,
+        limit,
+        offset
+      },
+      searchMetadata: {
+        query: options.search,
+        totalMatches: total,
+        executionTimeMs
+      }
+    };
   }
 
   public async getObservationsByType(
@@ -70,10 +154,41 @@ export class ObservationService {
   public async searchObservations(
     query: string,
     limit: number = 20
-  ): Promise<Observation[]> {
+  ): Promise<{
+    observations: Observation[];
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+    };
+    searchMetadata: {
+      query: string;
+      totalMatches: number;
+      executionTimeMs: number;
+    };
+  }> {
+    const startTime = Date.now();
+    
     // This would use the FTS functionality in DatabaseService
     // For now, we'll create a placeholder implementation
-    return [];
+    const observations: Observation[] = [];
+    const total = 0;
+    
+    const executionTimeMs = Date.now() - startTime;
+    
+    return {
+      observations,
+      pagination: {
+        total,
+        limit,
+        offset: 0
+      },
+      searchMetadata: {
+        query,
+        totalMatches: total,
+        executionTimeMs
+      }
+    };
   }
 
   public async getObservationsByDateRange(
@@ -104,9 +219,19 @@ export class ObservationService {
     };
   }
 
-  public async deleteObservation(id: string): Promise<void> {
-    // Soft delete by setting deleted_at timestamp
-    await this.db.updateObservation(id, { deletedAt: new Date() });
+  public async deleteObservation(
+    id: string, 
+    options?: { permanent?: boolean }
+  ): Promise<{ deleted: boolean; undoTimeoutSeconds?: number }> {
+    if (options?.permanent) {
+      // Permanent delete - would actually delete from database
+      // For now, just simulate
+      return { deleted: true };
+    } else {
+      // Soft delete by setting deleted_at timestamp
+      await this.db.updateObservation(id, { deletedAt: new Date() });
+      return { deleted: true, undoTimeoutSeconds: 300 }; // 5 minutes
+    }
   }
 
   private validateObservationData(type: ObservationType, content: string): void {

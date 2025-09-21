@@ -7,7 +7,7 @@ export class SettingsService {
   private db: DatabaseService;
   private bellScheduler: BellSchedulerService;
 
-  private constructor() {
+  constructor() {
     this.db = DatabaseService.getInstance();
     this.bellScheduler = BellSchedulerService.getInstance();
   }
@@ -62,6 +62,10 @@ export class SettingsService {
     return await this.db.updateSettings({ vibrationEnabled });
   }
 
+  public async updateSettings(settings: Partial<Settings>): Promise<Settings> {
+    return this.updateAllSettings(settings);
+  }
+
   public async updateAllSettings(settings: Partial<Settings>): Promise<Settings> {
     // Validate all settings before updating
     if (settings.bellDensity) {
@@ -110,6 +114,61 @@ export class SettingsService {
     };
 
     return await this.db.updateSettings(defaultSettings);
+  }
+
+  public async validateSettings(settings: Partial<Settings>): Promise<{
+    valid: boolean;
+    errors: string[];
+    warnings: string[];
+  }> {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    // Validate bell density
+    if (settings.bellDensity) {
+      try {
+        this.validateBellDensity(settings.bellDensity);
+      } catch (error) {
+        errors.push((error as Error).message);
+      }
+    }
+
+    // Validate active windows
+    if (settings.activeWindows) {
+      const validation = this.validateTimeWindows(settings.activeWindows);
+      if (!validation.valid) {
+        errors.push(...validation.errors);
+      }
+    }
+
+    // Validate quiet hours
+    if (settings.quietHours) {
+      const validation = this.validateTimeWindows(settings.quietHours, true);
+      if (!validation.valid) {
+        errors.push(...validation.errors);
+      }
+    }
+
+    // Validate schedule if complete settings provided
+    if (settings.activeWindows && settings.quietHours && settings.bellDensity) {
+      try {
+        const scheduleValidation = await this.bellScheduler.validateScheduleParams({
+          density: settings.bellDensity,
+          activeWindows: settings.activeWindows,
+          quietHours: settings.quietHours,
+          minimumInterval: 45
+        });
+        warnings.push(...scheduleValidation.warnings);
+      } catch (error) {
+        errors.push((error as Error).message);
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+      warnings
+    };
   }
 
   public async validateCurrentSettings(): Promise<{
