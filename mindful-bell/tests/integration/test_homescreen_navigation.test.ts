@@ -49,18 +49,18 @@ describe('HomeScreen Quick Capture Navigation TDD', () => {
   });
 
   describe('TDD: Quick Capture with Navigation', () => {
-    it('should navigate to observations screen after successful save', async () => {
-      // Arrange - Create a mock HomeScreen navigation handler
+    it('should automatically navigate to observations screen after successful save', async () => {
+      // Arrange - Create a mock HomeScreen navigation handler that auto-navigates
       const mockHomeScreenNavigationHandler = {
         handleObservationSave: async (observation: Observation) => {
           // This simulates what the HomeScreen should do:
           // 1. Close the modal
-          // 2. Show success message  
-          // 3. Navigate to observations screen
-          console.log('HomeScreen: Observation saved, navigating to observations');
+          // 2. Automatically navigate to observations screen
+          // 3. Show success message (optional)
+          console.log('HomeScreen: Observation saved, auto-navigating to observations');
           
-          // Navigate to observations tab/screen
-          mockNavigate('observations'); // or mockNavigate('(tabs)/observations')
+          // Automatically navigate to observations tab/screen
+          mockNavigate('/(tabs)/observations');
           
           return observation;
         }
@@ -69,15 +69,40 @@ describe('HomeScreen Quick Capture Navigation TDD', () => {
       // Act - Simulate the complete flow
       const savedObservation = await observationService.createObservation(
         'lesson',
-        'Test observation for navigation',
-        ['navigation-test']
+        'Test observation for auto navigation',
+        ['auto-navigation-test']
       );
 
-      // Simulate HomeScreen handling the save
+      // Simulate HomeScreen handling the save with auto-navigation
       await mockHomeScreenNavigationHandler.handleObservationSave(savedObservation);
 
-      // Assert - Should navigate to observations screen
-      expect(mockNavigate).toHaveBeenCalledWith('observations');
+      // Assert - Should automatically navigate to observations screen
+      expect(mockNavigate).toHaveBeenCalledWith('/(tabs)/observations');
+      expect(mockNavigate).toHaveBeenCalledTimes(1);
+    });
+
+    it('should navigate immediately without user interaction', async () => {
+      // Arrange - Test that navigation happens immediately, not after user clicks button
+      const mockImmediateNavigationHandler = {
+        handleObservationSave: async (observation: Observation) => {
+          // Should navigate immediately when called, not wait for user input
+          mockNavigate('/(tabs)/observations');
+          return observation;
+        }
+      };
+
+      // Act - Save observation
+      const savedObservation = await observationService.createObservation(
+        'desire',
+        'Test immediate navigation',
+        ['immediate-nav']
+      );
+
+      // Simulate immediate navigation (no alert dialogs)
+      await mockImmediateNavigationHandler.handleObservationSave(savedObservation);
+
+      // Assert - Navigation should happen immediately
+      expect(mockNavigate).toHaveBeenCalledWith('/(tabs)/observations');
       expect(mockNavigate).toHaveBeenCalledTimes(1);
     });
 
@@ -113,36 +138,70 @@ describe('HomeScreen Quick Capture Navigation TDD', () => {
       expect(foundNew?.content).toBe('New observation for refresh test');
     });
 
-    it('should handle navigation with proper success feedback', async () => {
-      // Arrange - Mock success feedback handler
-      const mockSuccessHandler = jest.fn();
+    it('should show success toast and auto-navigate', async () => {
+      // Arrange - Mock success toast handler (non-blocking feedback)
+      const mockToastHandler = jest.fn();
       
-      const mockHomeScreenWithFeedback = {
+      const mockHomeScreenWithToast = {
         handleObservationSave: async (observation: Observation) => {
-          // Show success feedback
-          mockSuccessHandler(`Observation saved: ${observation.content.substring(0, 30)}...`);
+          // Show non-blocking success toast
+          mockToastHandler(`Observation saved!`);
           
-          // Navigate after feedback
-          mockNavigate('observations');
+          // Immediately navigate (don't wait for user interaction)
+          mockNavigate('/(tabs)/observations');
           
           return observation;
         }
       };
 
-      // Act - Save observation with feedback
+      // Act - Save observation with toast feedback
       const observation = await observationService.createObservation(
         'affliction',
         'This is a longer observation content for testing feedback messages',
         ['feedback-test']
       );
 
-      await mockHomeScreenWithFeedback.handleObservationSave(observation);
+      await mockHomeScreenWithToast.handleObservationSave(observation);
 
-      // Assert - Should show feedback and navigate
-      expect(mockSuccessHandler).toHaveBeenCalledWith(
-        'Observation saved: This is a longer observation c...'
+      // Assert - Should show toast and navigate automatically
+      expect(mockToastHandler).toHaveBeenCalledWith('Observation saved!');
+      expect(mockNavigate).toHaveBeenCalledWith('/(tabs)/observations');
+    });
+
+    it('should provide fallback option if user prefers manual navigation', async () => {
+      // Arrange - Test for users who prefer to choose when to navigate
+      const mockAlertHandler = jest.fn();
+      
+      const mockHomeScreenWithChoice = {
+        handleObservationSave: async (observation: Observation) => {
+          // Provide choice: auto-navigate or stay
+          mockAlertHandler('Success', 'Observation saved!', [
+            { text: 'Stay Here', onPress: () => {} },
+            { text: 'View Observations', onPress: () => mockNavigate('/(tabs)/observations') }
+          ]);
+          
+          return observation;
+        }
+      };
+
+      // Act - Save observation with choice
+      const observation = await observationService.createObservation(
+        'lesson',
+        'Test observation with choice',
+        ['choice-test']
       );
-      expect(mockNavigate).toHaveBeenCalledWith('observations');
+
+      await mockHomeScreenWithChoice.handleObservationSave(observation);
+
+      // Assert - Should provide choice (this is the current implementation)
+      expect(mockAlertHandler).toHaveBeenCalledWith(
+        'Success', 
+        'Observation saved!', 
+        expect.arrayContaining([
+          expect.objectContaining({ text: 'Stay Here' }),
+          expect.objectContaining({ text: 'View Observations' })
+        ])
+      );
     });
 
     it('should handle navigation failure gracefully', async () => {
@@ -180,8 +239,10 @@ describe('HomeScreen Quick Capture Navigation TDD', () => {
       );
       
       // Observation should still be saved
-      const result = await observationService.getObservations({ limit: 1 });
-      expect(result.observations[0].content).toBe('Test observation for error handling');
+      const result = await observationService.getObservations({ limit: 10 });
+      const errorTestObservation = result.observations.find(obs => obs.content === 'Test observation for error handling');
+      expect(errorTestObservation).toBeDefined();
+      expect(errorTestObservation?.tags).toContain('error-test');
     });
 
     it('should support different navigation patterns (tabs vs stack)', async () => {
