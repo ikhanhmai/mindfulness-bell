@@ -8,8 +8,11 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "lint": "expo lint",
-		"lint:md": "markdownlint 'specs/**/*.md' 'templates/*.md'",
+    "lint:md": "markdownlint 'specs/**/*.md' 'templates/*.md'",
     "lint:openapi": "spectral lint 'specs/**/*.{yaml,yml,json}' -r .spectral.yaml"
   },
   "dependencies": {
@@ -46,11 +49,14 @@
   },
   "devDependencies": {
     "@stoplight/spectral-cli": "^6.15.0",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "eslint": "^9.35.0",
     "eslint-config-expo": "~10.0.0",
+    "jest": "^30.1.3",
     "markdownlint-cli": "^0.45.0",
     "prettier": "^3.6.2",
+    "ts-jest": "^29.4.4",
     "typescript": "~5.9.2"
   },
   "private": true
