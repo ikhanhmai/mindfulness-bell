@@ -25,10 +25,10 @@
 - [x] T014 [P] DatabaseService with SQLite setup and migrations in src/services/DatabaseService.ts
 - [ ] T015 [P] EncryptionService with expo-secure-store integration in src/services/EncryptionService.ts
 - [x] T016 [P] BellSchedulerService with random time generation in src/services/BellSchedulerService.ts
-- [ ] T017 [P] NotificationManager with expo-notifications setup in src/services/NotificationManager.ts
-- [ ] T018 [P] ObservationService with CRUD operations in src/services/ObservationService.ts
-- [ ] T019 [P] SettingsService with user preferences in src/services/SettingsService.ts
-- [ ] T020 [P] StatsService with analytics queries in src/services/StatsService.ts
+- [x] T017 [P] NotificationManager with expo-notifications setup in src/services/NotificationManager.ts
+- [x] T018 [P] ObservationService with CRUD operations in src/services/ObservationService.ts
+- [x] T019 [P] SettingsService with user preferences in src/services/SettingsService.ts
+- [x] T020 [P] StatsService with analytics queries in src/services/StatsService.ts
 
 ## Phase 3.4: Data Models and Types
 - [x] T021 [P] TypeScript types for core entities in src/types/index.ts
@@ -45,10 +45,10 @@
 - [ ] T030 [P] Custom hooks for bell events in src/hooks/useBellEvents.ts
 
 ## Phase 3.6: UI Components
-- [ ] T031 [P] HomeScreen with next bell and quick capture in src/screens/HomeScreen.tsx
-- [ ] T032 [P] SettingsScreen with time windows and preferences in src/screens/SettingsScreen.tsx
-- [ ] T033 [P] ObservationsScreen with list and filters in src/screens/ObservationsScreen.tsx
-- [ ] T034 [P] StatsScreen with practice statistics in src/screens/StatsScreen.tsx
+- [x] T031 [P] HomeScreen with next bell and quick capture in src/screens/HomeScreen.tsx
+- [x] T032 [P] SettingsScreen with time windows and preferences in src/screens/SettingsScreen.tsx
+- [x] T033 [P] ObservationsScreen with list and filters in src/screens/ObservationsScreen.tsx
+- [x] T034 [P] StatsScreen with practice statistics in src/screens/StatsScreen.tsx
 - [ ] T035 [P] BellAcknowledgmentModal for notification response in src/components/BellAcknowledgmentModal.tsx
 - [ ] T036 [P] ObservationForm for entry creation/editing in src/components/ObservationForm.tsx
 - [ ] T037 [P] TimeWindowPicker for settings configuration in src/components/TimeWindowPicker.tsx
