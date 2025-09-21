@@ -52,32 +52,43 @@ export const HomeScreen: React.FC = () => {
   const handleObservationSave = (observation: Observation) => {
     setShowObservationForm(false);
     
-    // Show success feedback with navigation option
-    Alert.alert(
-      'Success', 
-      `Observation saved successfully!\n\nType: ${observation.type}\nContent: ${observation.content.substring(0, 50)}...`,
-      [
-        {
-          text: 'Stay Here',
-          style: 'cancel'
-        },
-        {
-          text: 'View Observations',
-          onPress: () => {
-            try {
-              // Navigate to observations screen
-              router.push('/(tabs)/observations');
-            } catch (error) {
-              console.error('Navigation failed:', error);
-              // Fallback: show message that observation was saved
-              Alert.alert('Note', 'Observation saved! You can view it in the Observations tab.');
+    console.log('Observation saved from HomeScreen:', observation);
+    
+    // Automatically navigate to observations screen
+    try {
+      router.push('/(tabs)/observations');
+      
+      // Show brief success toast (non-blocking) - could be implemented with a toast library
+      // For now, we'll use a brief console log
+      console.log('✅ Navigating to observations screen...');
+      
+    } catch (error) {
+      console.error('Navigation failed:', error);
+      
+      // Fallback: show alert with manual navigation option
+      Alert.alert(
+        'Success', 
+        `Observation saved successfully!\n\nType: ${observation.type}\nContent: ${observation.content.substring(0, 50)}...`,
+        [
+          {
+            text: 'Stay Here',
+            style: 'cancel'
+          },
+          {
+            text: 'View Observations',
+            onPress: () => {
+              // Retry navigation
+              try {
+                router.push('/(tabs)/observations');
+              } catch (retryError) {
+                console.error('Retry navigation failed:', retryError);
+                Alert.alert('Note', 'Observation saved! You can view it in the Observations tab.');
+              }
             }
           }
-        }
-      ]
-    );
-    
-    console.log('Observation saved from HomeScreen:', observation);
+        ]
+      );
+    }
   };
 
   const handleObservationCancel = () => {
