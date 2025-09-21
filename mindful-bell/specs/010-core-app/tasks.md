@@ -17,9 +17,9 @@
 - [x] T008 [P] Contract test settings management in tests/contract/test_settings.test.ts
 - [x] T009 [P] Contract test statistics queries in tests/contract/test_stats.test.ts
 - [x] T010 [P] Integration test notification scheduling in tests/integration/test_notifications.test.ts
-- [ ] T011 [P] Integration test database initialization in tests/integration/test_database.test.ts
-- [ ] T012 [P] Integration test bell acknowledgment flow in tests/integration/test_bell_flow.test.ts
-- [ ] T013 [P] Integration test observation creation from bell in tests/integration/test_observation_flow.test.ts
+- [x] T011 [P] Integration test database initialization in tests/integration/test_database.test.ts
+- [x] T012 [P] Integration test bell acknowledgment flow in tests/integration/test_bell_flow.test.ts
+- [x] T013 [P] Integration test observation creation from bell in tests/integration/test_observation_flow.test.ts
 
 ## Phase 3.3: Core Services (ONLY after tests are failing)
 - [x] T014 [P] DatabaseService with SQLite setup and migrations in src/services/DatabaseService.ts
@@ -55,8 +55,8 @@
 - [x] T038 [P] StatsChart for practice visualization in src/components/StatsChart.tsx
 
 ## Phase 3.7: Background Processing and Notifications
-- [ ] T039 Background task registration with expo-task-manager in src/services/BackgroundTasks.ts
-- [ ] T040 Daily bell schedule generation task implementation
+- [x] T039 Background task registration with expo-task-manager in src/services/BackgroundTasks.ts
+- [x] T040 Daily bell schedule generation task implementation
 - [ ] T041 Notification permission request and handling
 - [ ] T042 Bell notification delivery and acknowledgment tracking
 - [ ] T043 iOS notification limit management (64 notification cap)
