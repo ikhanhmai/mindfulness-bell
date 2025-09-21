@@ -1,3 +1,3 @@
-import { ObservationsScreen } from '@/src/screens/ObservationsScreen';
+import ObservationsScreen from '@/src/screens/ObservationsScreen';
 
 export default ObservationsScreen;

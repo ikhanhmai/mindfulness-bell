@@ -5,7 +5,7 @@ import { ObservationForm } from '../components/ObservationForm';
 import { useObservations } from '../hooks/useObservations';
 import { useFocusEffect } from '@react-navigation/native';
 
-export const ObservationsScreen: React.FC = () => {
+const ObservationsScreen: React.FC = () => {
   const { observations, isLoading, refresh } = useObservations();
   const [selectedType, setSelectedType] = useState<ObservationType | 'all'>('all');
   const [refreshing, setRefreshing] = useState(false);
@@ -360,3 +360,5 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
 });
+
+export default ObservationsScreen;

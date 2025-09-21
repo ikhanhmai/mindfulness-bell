@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Alert } f
 import { Settings, BellDensity, TimeWindow } from '../types';
 import { DatabaseService } from '../services/DatabaseService';
 
-export const SettingsScreen: React.FC = () => {
+const SettingsScreen: React.FC = () => {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -332,3 +332,5 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
 });
+
+export default SettingsScreen;

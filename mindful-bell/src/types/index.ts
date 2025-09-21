@@ -145,6 +145,21 @@ export interface ValidateSettingsResponse {
   warnings: string[];
 }
 
+// Notification types
+export interface NotificationResponse {
+  identifier: string;
+  actionIdentifier: string;
+  userText?: string;
+  notification?: {
+    request: {
+      identifier: string;
+      content: {
+        data?: any;
+      };
+    };
+  };
+}
+
 // Navigation types
 export type RootTabParamList = {
   Home: undefined;

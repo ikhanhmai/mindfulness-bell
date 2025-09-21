@@ -1,7 +1,16 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { BellEvent } from '../types';
 import { DatabaseService } from './DatabaseService';
+
+// Conditionally import Notifications only on native platforms
+let Notifications: any = null;
+if (Platform.OS !== 'web') {
+  try {
+    Notifications = require('expo-notifications'); // eslint-disable-line @typescript-eslint/no-require-imports
+  } catch (error) {
+    console.warn('Expo notifications not available:', error);
+  }
+}
 
 export interface NotificationScheduleResult {
   scheduled: string[];
@@ -29,9 +38,11 @@ export class NotificationManager {
   private static instance: NotificationManager;
   private db: DatabaseService;
   private isInitialized: boolean = false;
+  private isWeb: boolean;
 
   constructor() {
     this.db = DatabaseService.getInstance();
+    this.isWeb = Platform.OS === 'web';
   }
 
   public static getInstance(): NotificationManager {
@@ -44,33 +55,59 @@ export class NotificationManager {
   public async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
-    // Configure notification behavior
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
-        shouldShowBanner: true,
-        shouldShowList: true,
-      }),
-    });
+    // Web fallback: Skip notification setup
+    if (this.isWeb || !Notifications) {
+      console.warn('Notifications not available on web platform');
+      this.isInitialized = false; // Keep as false for web
+      return;
+    }
 
-    // Request permissions
-    await this.requestPermissions();
+    try {
+      // Configure notification behavior
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+          shouldShowBanner: true,
+          shouldShowList: true,
+        }),
+      });
 
-    this.isInitialized = true;
+      // Request permissions
+      await this.requestPermissions();
+
+      this.isInitialized = true;
+    } catch (error) {
+      console.error('Failed to initialize notifications:', error);
+      this.isInitialized = false;
+    }
+  }
+
+  public async getInitializationStatus(): Promise<boolean> {
+    return this.isInitialized;
   }
 
   public async requestPermissions(): Promise<boolean> {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
+    // Web fallback: No permissions available
+    if (this.isWeb || !Notifications) {
+      return false;
     }
 
-    return finalStatus === 'granted';
+    try {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      return finalStatus === 'granted';
+    } catch (error) {
+      console.error('Failed to request permissions:', error);
+      return false;
+    }
   }
 
   public async scheduleBellNotifications(
@@ -80,42 +117,58 @@ export class NotificationManager {
       scheduled: [],
       failed: [],
       limitations: {
-        platformLimit: Platform.OS === 'ios' ? 64 : 500,
+        platformLimit: this.isWeb ? 0 : (Platform.OS === 'ios' ? 64 : 500),
         requested: bellEvents.length,
         actuallyScheduled: 0
       }
     };
 
-    // Clear existing bell notifications first
-    await this.clearBellNotifications();
-
-    // Sort by scheduled time
-    const sortedEvents = bellEvents.sort((a, b) =>
-      a.scheduledTime.getTime() - b.scheduledTime.getTime()
-    );
-
-    // Apply platform limits
-    const eventsToSchedule = sortedEvents.slice(0, result.limitations.platformLimit);
-
-    for (const bellEvent of eventsToSchedule) {
-      try {
-        const notificationId = await this.scheduleSingleBellNotification(bellEvent);
-        result.scheduled.push(notificationId);
-      } catch (error) {
-        console.error('Failed to schedule notification:', error);
-        result.failed.push(bellEvent.id);
-      }
+    // Web fallback: Cannot schedule notifications
+    if (this.isWeb || !Notifications) {
+      result.failed = bellEvents.map(event => event.id);
+      return result;
     }
 
-    result.limitations.actuallyScheduled = result.scheduled.length;
+    try {
+      // Clear existing bell notifications first
+      await this.clearBellNotifications();
+
+      // Sort by scheduled time
+      const sortedEvents = bellEvents.sort((a, b) =>
+        a.scheduledTime.getTime() - b.scheduledTime.getTime()
+      );
+
+      // Apply platform limits
+      const eventsToSchedule = sortedEvents.slice(0, result.limitations.platformLimit);
+
+      for (const bellEvent of eventsToSchedule) {
+        try {
+          const notificationId = await this.scheduleSingleBellNotification(bellEvent);
+          result.scheduled.push(notificationId);
+        } catch (error) {
+          console.error('Failed to schedule notification:', error);
+          result.failed.push(bellEvent.id);
+        }
+      }
+
+      result.limitations.actuallyScheduled = result.scheduled.length;
+    } catch (error) {
+      console.error('Failed to schedule bell notifications:', error);
+      result.failed = bellEvents.map(event => event.id);
+    }
 
     return result;
   }
 
   private async scheduleSingleBellNotification(bellEvent: BellEvent): Promise<string> {
+    // Web fallback: Cannot schedule individual notifications
+    if (this.isWeb || !Notifications) {
+      throw new Error('Notifications not available on web platform');
+    }
+
     const settings = await this.db.getSettings();
 
-    const notificationContent: Notifications.NotificationContentInput = {
+    const notificationContent: any = {
       title: '🔔 Mindful Bell',
       body: 'Take a moment to be present',
       data: {
@@ -123,12 +176,12 @@ export class NotificationManager {
         type: 'bell'
       },
       sound: settings.soundEnabled ? true : false,
-      priority: Notifications.AndroidNotificationPriority.HIGH,
+      priority: Notifications.AndroidNotificationPriority?.HIGH,
       categoryIdentifier: 'BELL_CATEGORY'
     };
 
-    const trigger: Notifications.DateTriggerInput = {
-      type: Notifications.SchedulableTriggerInputTypes.DATE,
+    const trigger: any = {
+      type: Notifications.SchedulableTriggerInputTypes?.DATE,
       date: bellEvent.scheduledTime,
     };
 
@@ -140,19 +193,28 @@ export class NotificationManager {
   }
 
   public async clearBellNotifications(): Promise<void> {
-    const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+    // Web fallback: No notifications to clear
+    if (this.isWeb || !Notifications) {
+      return;
+    }
 
-    const bellNotificationIds = scheduledNotifications
-      .filter(notification =>
-        notification.identifier.startsWith('bell-') ||
-        notification.content.data?.type === 'bell'
-      )
-      .map(notification => notification.identifier);
+    try {
+      const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
 
-    if (bellNotificationIds.length > 0) {
-      for (const id of bellNotificationIds) {
-        await Notifications.cancelScheduledNotificationAsync(id);
+      const bellNotificationIds = scheduledNotifications
+        .filter((notification: any) =>
+          notification.identifier.startsWith('bell-') ||
+          notification.content.data?.type === 'bell'
+        )
+        .map((notification: any) => notification.identifier);
+
+      if (bellNotificationIds.length > 0) {
+        for (const id of bellNotificationIds) {
+          await Notifications.cancelScheduledNotificationAsync(id);
+        }
       }
+    } catch (error) {
+      console.error('Failed to clear bell notifications:', error);
     }
   }
 
@@ -203,85 +265,161 @@ export class NotificationManager {
   }
 
   public async setupNotificationCategories(): Promise<void> {
-    // Define notification categories with actions
-    await Notifications.setNotificationCategoryAsync('BELL_CATEGORY', [
-      {
-        identifier: 'acknowledge',
-        buttonTitle: 'Acknowledge',
-        options: {
-          opensAppToForeground: false,
+    // Web fallback: No notification categories
+    if (this.isWeb || !Notifications) {
+      return;
+    }
+
+    try {
+      // Define notification categories with actions
+      await Notifications.setNotificationCategoryAsync('BELL_CATEGORY', [
+        {
+          identifier: 'acknowledge',
+          buttonTitle: 'Acknowledge',
+          options: {
+            opensAppToForeground: false,
+          },
         },
-      },
-      {
-        identifier: 'observe',
-        buttonTitle: 'Quick Note',
-        textInput: {
-          submitButtonTitle: 'Save',
-          placeholder: 'What did you observe?'
+        {
+          identifier: 'observe',
+          buttonTitle: 'Quick Note',
+          textInput: {
+            submitButtonTitle: 'Save',
+            placeholder: 'What did you observe?'
+          },
+          options: {
+            opensAppToForeground: false,
+          },
         },
-        options: {
-          opensAppToForeground: false,
-        },
-      },
-    ]);
+      ]);
+    } catch (error) {
+      console.error('Failed to setup notification categories:', error);
+    }
   }
 
   public async getScheduledNotificationsCount(): Promise<number> {
-    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-    return scheduled.filter(n =>
-      n.identifier.startsWith('bell-') ||
-      n.content.data?.type === 'bell'
-    ).length;
+    // Web fallback: No scheduled notifications
+    if (this.isWeb || !Notifications) {
+      return 0;
+    }
+
+    try {
+      const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+      return scheduled.filter((n: any) =>
+        n.identifier.startsWith('bell-') ||
+        n.content.data?.type === 'bell'
+      ).length;
+    } catch (error) {
+      console.error('Failed to get scheduled notifications count:', error);
+      return 0;
+    }
   }
 
   public async getNextScheduledNotification(): Promise<Date | null> {
-    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-    const bellNotifications = scheduled.filter(n =>
-      n.identifier.startsWith('bell-') ||
-      n.content.data?.type === 'bell'
-    );
+    // Web fallback: No scheduled notifications
+    if (this.isWeb || !Notifications) {
+      return null;
+    }
 
-    if (bellNotifications.length === 0) return null;
+    try {
+      const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+      const bellNotifications = scheduled.filter((n: any) =>
+        n.identifier.startsWith('bell-') ||
+        n.content.data?.type === 'bell'
+      );
 
-    const nextNotification = bellNotifications
-      .map(n => n.trigger)
-      .filter(trigger => trigger && 'date' in trigger && trigger.date)
-      .map(trigger => new Date((trigger as any).date))
-      .sort((a, b) => a.getTime() - b.getTime())[0];
+      if (bellNotifications.length === 0) return null;
 
-    return nextNotification || null;
+      const nextNotification = bellNotifications
+        .map((n: any) => n.trigger)
+        .filter((trigger: any) => trigger && 'date' in trigger && trigger.date)
+        .map((trigger: any) => new Date(trigger.date))
+        .sort((a: any, b: any) => a.getTime() - b.getTime())[0];
+
+      return nextNotification || null;
+    } catch (error) {
+      console.error('Failed to get next scheduled notification:', error);
+      return null;
+    }
   }
 
   public async testNotification(): Promise<string> {
-    const settings = await this.db.getSettings();
+    // Web fallback: Cannot send test notifications
+    if (this.isWeb || !Notifications) {
+      return '';
+    }
 
-    return await Notifications.scheduleNotificationAsync({
-      content: {
-        title: '🔔 Test Bell',
-        body: 'This is a test notification',
-        sound: settings.soundEnabled,
-        data: { type: 'test' }
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: 1,
-      },
-    });
+    try {
+      const settings = await this.db.getSettings();
+
+      return await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '🔔 Test Bell',
+          body: 'This is a test notification',
+          sound: settings.soundEnabled,
+          data: { type: 'test' }
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes?.TIME_INTERVAL,
+          seconds: 1,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to send test notification:', error);
+      return '';
+    }
   }
 
   public async cancelAllNotifications(): Promise<void> {
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    // Web fallback: No notifications to cancel
+    if (this.isWeb || !Notifications) {
+      return;
+    }
+
+    try {
+      await Notifications.cancelAllScheduledNotificationsAsync();
+    } catch (error) {
+      console.error('Failed to cancel all notifications:', error);
+    }
   }
 
   public async getBadgeCount(): Promise<number> {
-    return await Notifications.getBadgeCountAsync();
+    // Web fallback: No badge support
+    if (this.isWeb || !Notifications) {
+      return 0;
+    }
+
+    try {
+      return await Notifications.getBadgeCountAsync();
+    } catch (error) {
+      console.error('Failed to get badge count:', error);
+      return 0;
+    }
   }
 
   public async setBadgeCount(count: number): Promise<void> {
-    await Notifications.setBadgeCountAsync(count);
+    // Web fallback: No badge support
+    if (this.isWeb || !Notifications) {
+      return;
+    }
+
+    try {
+      await Notifications.setBadgeCountAsync(count);
+    } catch (error) {
+      console.error('Failed to set badge count:', error);
+    }
   }
 
   public async clearBadge(): Promise<void> {
-    await Notifications.setBadgeCountAsync(0);
+    // Web fallback: No badge support
+    if (this.isWeb || !Notifications) {
+      return;
+    }
+
+    try {
+      await Notifications.setBadgeCountAsync(0);
+    } catch (error) {
+      console.error('Failed to clear badge:', error);
+    }
   }
 }

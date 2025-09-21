@@ -5,8 +5,7 @@ import { Observation, BellEvent, Settings } from '../types';
 let SQLite: any = null;
 if (Platform.OS !== 'web') {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    SQLite = require('expo-sqlite');
+    SQLite = require('expo-sqlite'); // eslint-disable-line @typescript-eslint/no-require-imports
   } catch (error) {
     console.warn('SQLite not available:', error);
   }
@@ -37,6 +36,25 @@ export class DatabaseService {
     this.db = await SQLite.openDatabaseAsync('mindful_bell.db');
     await this.createTables();
     await this.runMigrations();
+  }
+
+  public async isHealthy(): Promise<boolean> {
+    try {
+      if (this.isWeb) {
+        return true; // Web mock is always healthy
+      }
+
+      if (!this.db) {
+        return false;
+      }
+
+      // Test database connectivity with a simple query
+      await this.db.getFirstAsync('SELECT 1 as test');
+      return true;
+    } catch (error) {
+      console.error('Database health check failed:', error);
+      return false;
+    }
   }
 
   private async createTables(): Promise<void> {

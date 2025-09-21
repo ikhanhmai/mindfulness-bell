@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
+import { useRouter } from 'expo-router';
 import { BellEvent, Observation } from '../types';
 import { BellSchedulerService } from '../services/BellSchedulerService';
 import { DatabaseService } from '../services/DatabaseService';
 import { ObservationForm } from '../components/ObservationForm';
-import { router } from 'expo-router';
-
-export const HomeScreen: React.FC = () => {
+const HomeScreen: React.FC = () => {
+  const router = useRouter();
   const [nextBell, setNextBell] = useState<BellEvent | null>(null);
   const [todaysBells, setTodaysBells] = useState<BellEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -280,3 +280,5 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
 });
+
+export default HomeScreen;

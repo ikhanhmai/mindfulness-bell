@@ -15,7 +15,7 @@ interface TypeStats {
   percentage: number;
 }
 
-export const StatsScreen: React.FC = () => {
+const StatsScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('week');
 
@@ -400,3 +400,5 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
 });
+
+export default StatsScreen;
