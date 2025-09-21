@@ -80,7 +80,7 @@ describe('StatsService Contract Tests', () => {
     it('should identify most common observation types', async () => {
       const obsStats = await statsService.getObservationStats('week');
 
-      const types = ['desire', 'fear', 'affliction', 'lesson'];
+      const types: ('desire' | 'fear' | 'affliction' | 'lesson')[] = ['desire', 'fear', 'affliction', 'lesson'];
       types.forEach(type => {
         expect(obsStats.observationsByType[type]).toBeGreaterThanOrEqual(0);
       });

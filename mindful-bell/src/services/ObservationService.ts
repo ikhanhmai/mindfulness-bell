@@ -62,10 +62,14 @@ export class ObservationService {
 
     this.validateObservationData(type, actualContent);
 
+    // Extract hashtags from content
+    const extractedTags = this.extractHashtags(actualContent);
+    const allTags = [...new Set([...actualTags, ...extractedTags])]; // Remove duplicates
+
     return await this.db.insertObservation({
       type,
       content: actualContent.trim(),
-      tags: actualTags,
+      tags: allTags,
       bellEventId: actualBellEventId
     });
   }
@@ -74,9 +78,22 @@ export class ObservationService {
     id: string,
     updates: Partial<Pick<Observation, 'content' | 'tags'>>
   ): Promise<Observation> {
+    // Check if observation exists first
+    try {
+      await this.db.getObservationById(id);
+    } catch {
+      throw new Error('Observation not found');
+    }
+
     if (updates.content !== undefined) {
       this.validateContent(updates.content);
-      updates.content = updates.content.trim();
+    }
+
+    if (updates.tags !== undefined) {
+      const tagValidation = this.validateTags(updates.tags);
+      if (!tagValidation.valid) {
+        throw new Error(`Invalid tags: ${tagValidation.errors.join(', ')}`);
+      }
     }
 
     return await this.db.updateObservation(id, updates);
@@ -256,8 +273,8 @@ export class ObservationService {
       throw new Error('Content cannot be empty');
     }
 
-    if (trimmedContent.length > 5000) {
-      throw new Error('Content cannot exceed 5000 characters');
+    if (trimmedContent.length > 2000) {
+      throw new Error('Content exceeds maximum length');
     }
 
     if (trimmedContent.length < 3) {
@@ -307,5 +324,13 @@ export class ObservationService {
     }
 
     return { valid: errors.length === 0, errors };
+  }
+
+  private extractHashtags(content: string): string[] {
+    const hashtagRegex = /#(\w+)/g;
+    const matches = content.match(hashtagRegex);
+    if (!matches) return [];
+    
+    return matches.map(tag => tag.substring(1).toLowerCase()); // Remove # and convert to lowercase
   }
 }

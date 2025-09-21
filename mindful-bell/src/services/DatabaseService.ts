@@ -145,7 +145,7 @@ export class DatabaseService {
     if (!this.db) return 0;
 
     try {
-      const result = await this.db.getFirstAsync<{ version: number }>(`
+      const result = await this.db.getFirstAsync(`
         SELECT version FROM schema_version ORDER BY version DESC LIMIT 1;
       `);
       return result?.version || 0;
@@ -214,7 +214,7 @@ export class DatabaseService {
     }
     if (!this.db) throw new Error('Database not initialized');
 
-    const result = await this.db.getFirstAsync<any>(`
+    const result = await this.db.getFirstAsync(`
       SELECT * FROM entries WHERE id = ? AND deleted_at IS NULL
     `, [id]);
 
@@ -251,7 +251,7 @@ export class DatabaseService {
     }
     if (!this.db) throw new Error('Database not initialized');
 
-    let result = await this.db.getFirstAsync<any>(`
+    let result = await this.db.getFirstAsync(`
       SELECT * FROM settings WHERE id = 'default'
     `);
 
@@ -398,6 +398,11 @@ export class DatabaseService {
   }
 
   private async mockGetObservationById(id: string): Promise<Observation> {
+    // Simulate non-existent observation for certain IDs
+    if (id === 'non-existent-id') {
+      throw new Error('Observation not found');
+    }
+    
     return {
       id,
       type: 'lesson',

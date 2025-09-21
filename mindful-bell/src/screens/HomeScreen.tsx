@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
 import { BellEvent } from '../types';
 import { BellSchedulerService } from '../services/BellSchedulerService';
 import { DatabaseService } from '../services/DatabaseService';
+import { ObservationForm } from '../components/ObservationForm';
 
 export const HomeScreen: React.FC = () => {
   const [nextBell, setNextBell] = useState<BellEvent | null>(null);
   const [todaysBells, setTodaysBells] = useState<BellEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showObservationForm, setShowObservationForm] = useState(false);
 
   useEffect(() => {
     loadTodaysSchedule();
@@ -43,10 +45,16 @@ export const HomeScreen: React.FC = () => {
   };
 
   const handleQuickCapture = () => {
-    Alert.alert('Quick Capture', 'This will open observation form', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Continue', onPress: () => console.log('Navigate to observation form') }
-    ]);
+    setShowObservationForm(true);
+  };
+
+  const handleObservationSave = () => {
+    setShowObservationForm(false);
+    Alert.alert('Success', 'Observation saved successfully!');
+  };
+
+  const handleObservationCancel = () => {
+    setShowObservationForm(false);
   };
 
   const formatTime = (date: Date) => {
@@ -112,6 +120,18 @@ export const HomeScreen: React.FC = () => {
       <TouchableOpacity style={styles.refreshButton} onPress={loadTodaysSchedule}>
         <Text style={styles.refreshText}>Refresh Schedule</Text>
       </TouchableOpacity>
+
+      <Modal
+        visible={showObservationForm}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleObservationCancel}
+      >
+        <ObservationForm
+          onSave={handleObservationSave}
+          onCancel={handleObservationCancel}
+        />
+      </Modal>
     </View>
   );
 };

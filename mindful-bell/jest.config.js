@@ -13,10 +13,16 @@ module.exports = {
     'src/**/*.ts',
     '!src/**/*.d.ts',
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
-    '^@/src/(.*)$': '<rootDir>/src/$1'
+    '^@/src/(.*)$': '<rootDir>/src/$1',
+    '^react-native$': 'react-native-web',
+    '^expo-notifications$': '<rootDir>/tests/__mocks__/expo-notifications.js',
+    '^expo-sqlite$': '<rootDir>/tests/__mocks__/expo-sqlite.js'
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(expo|@expo|react-native|@react-native|expo-notifications|expo-sqlite)/)'
+  ],
   setupFilesAfterEnv: [],
   testTimeout: 10000,
 };

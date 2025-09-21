@@ -38,21 +38,21 @@
 - [ ] T025 [P] Stats model with aggregation types in src/models/Stats.ts
 
 ## Phase 3.5: React Context and State Management
-- [ ] T026 [P] DatabaseContext with service providers in src/hooks/DatabaseContext.tsx
-- [ ] T027 [P] SettingsContext with user preferences in src/hooks/SettingsContext.tsx
-- [ ] T028 [P] NotificationContext with permission handling in src/hooks/NotificationContext.tsx
-- [ ] T029 [P] Custom hooks for observations in src/hooks/useObservations.ts
-- [ ] T030 [P] Custom hooks for bell events in src/hooks/useBellEvents.ts
+- [x] T026 [P] DatabaseContext with service providers in src/hooks/DatabaseContext.tsx
+- [x] T027 [P] SettingsContext with user preferences in src/hooks/SettingsContext.tsx
+- [x] T028 [P] NotificationContext with permission handling in src/hooks/NotificationContext.tsx
+- [x] T029 [P] Custom hooks for observations in src/hooks/useObservations.ts
+- [x] T030 [P] Custom hooks for bell events in src/hooks/useBellEvents.ts
 
 ## Phase 3.6: UI Components
 - [x] T031 [P] HomeScreen with next bell and quick capture in src/screens/HomeScreen.tsx
 - [x] T032 [P] SettingsScreen with time windows and preferences in src/screens/SettingsScreen.tsx
 - [x] T033 [P] ObservationsScreen with list and filters in src/screens/ObservationsScreen.tsx
 - [x] T034 [P] StatsScreen with practice statistics in src/screens/StatsScreen.tsx
-- [ ] T035 [P] BellAcknowledgmentModal for notification response in src/components/BellAcknowledgmentModal.tsx
-- [ ] T036 [P] ObservationForm for entry creation/editing in src/components/ObservationForm.tsx
-- [ ] T037 [P] TimeWindowPicker for settings configuration in src/components/TimeWindowPicker.tsx
-- [ ] T038 [P] StatsChart for practice visualization in src/components/StatsChart.tsx
+- [x] T035 [P] BellAcknowledgmentModal for notification response in src/components/BellAcknowledgmentModal.tsx
+- [x] T036 [P] ObservationForm for entry creation/editing in src/components/ObservationForm.tsx
+- [x] T037 [P] TimeWindowPicker for settings configuration in src/components/TimeWindowPicker.tsx
+- [x] T038 [P] StatsChart for practice visualization in src/components/StatsChart.tsx
 
 ## Phase 3.7: Background Processing and Notifications
 - [ ] T039 Background task registration with expo-task-manager in src/services/BackgroundTasks.ts

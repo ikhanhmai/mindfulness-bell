@@ -114,8 +114,8 @@ describe('ObservationService Contract Tests', () => {
       });
 
       result.observations.forEach(obs => {
-        expect(obs.createdAt).toBeGreaterThanOrEqual(dateFrom);
-        expect(obs.createdAt).toBeLessThanOrEqual(dateTo);
+        expect(obs.createdAt.getTime()).toBeGreaterThanOrEqual(dateFrom.getTime());
+        expect(obs.createdAt.getTime()).toBeLessThanOrEqual(dateTo.getTime());
       });
     });
   });

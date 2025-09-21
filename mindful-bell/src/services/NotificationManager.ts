@@ -127,8 +127,8 @@ export class NotificationManager {
       categoryIdentifier: 'BELL_CATEGORY'
     };
 
-    const trigger: Notifications.NotificationTriggerInput = {
-      type: 'date',
+    const trigger: Notifications.DateTriggerInput = {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
       date: bellEvent.scheduledTime,
     };
 
@@ -263,7 +263,7 @@ export class NotificationManager {
         data: { type: 'test' }
       },
       trigger: {
-        type: 'timeInterval',
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: 1,
       },
     });
