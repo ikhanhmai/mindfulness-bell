@@ -20,6 +20,7 @@ basic statistics.
 - As a user, I want to quickly capture a Desire, Fear, or Affliction, so that I can become aware of my inner state.
 - As a user, I want to edit or delete past observations, so that my log remains accurate and relevant.
 - As a user, I want to search or filter observations by tags or text, so that I can review patterns in my thoughts.
+- As a user, I want to see category counts in filter buttons (e.g., "Desires (5)", "Fears (2)"), so that I can quickly see how many observations I have of each type.
 - As a user, I want to see an empty state message when I have no observations, so that the app still feels supportive.
 
 ### Lessons
@@ -56,6 +57,7 @@ basic statistics.
 - Entry type must be one of: desire, fear, affliction
 - Support tagging and free text notes with hashtag auto-extraction
 - List view with search and filters (results in <200ms)
+- **Category counts in filter buttons**: Display real-time counts for each observation type (e.g., "All (12)", "Desires (5)", "Fears (3)", "Afflictions (2)", "Lessons (2)")
 - Edit and soft delete with 5-second undo option
 - Empty state and error state UX with supportive, non-judgmental text
 - Cross-platform CRUD operations
@@ -121,6 +123,7 @@ basic statistics.
 - [x] User can create an observation in ≤ 3 taps
 - [ ] User can edit and soft-delete an observation (currently hard delete)
 - [ ] Search returns matching entries within 200ms
+- [ ] **Category counts displayed in filter buttons** showing real-time observation counts by type
 - [x] Empty state message is displayed when no observations exist
 - [x] Observations captured from a bell acknowledgement are saved correctly
 

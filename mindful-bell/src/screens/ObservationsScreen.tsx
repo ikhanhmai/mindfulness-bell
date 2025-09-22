@@ -6,7 +6,7 @@ import { useObservations } from '../hooks/useObservations';
 import { useFocusEffect } from '@react-navigation/native';
 
 const ObservationsScreen: React.FC = () => {
-  const { observations, isLoading, refresh } = useObservations();
+  const { observations, isLoading, refresh, categoryCounts } = useObservations();
   const [selectedType, setSelectedType] = useState<ObservationType | 'all'>('all');
   const [refreshing, setRefreshing] = useState(false);
   const [showObservationForm, setShowObservationForm] = useState(false);
@@ -101,23 +101,28 @@ const ObservationsScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  const renderFilterButton = (type: ObservationType | 'all', label: string) => (
-    <TouchableOpacity
-      key={type}
-      style={[
-        styles.filterButton,
-        selectedType === type && styles.filterButtonActive
-      ]}
-      onPress={() => setSelectedType(type)}
-    >
-      <Text style={[
-        styles.filterButtonText,
-        selectedType === type && styles.filterButtonTextActive
-      ]}>
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
+  const renderFilterButton = (type: ObservationType | 'all', label: string) => {
+    const count = categoryCounts ? categoryCounts[type] : 0;
+    const displayLabel = count > 0 ? `${label} (${count})` : label;
+
+    return (
+      <TouchableOpacity
+        key={type}
+        style={[
+          styles.filterButton,
+          selectedType === type && styles.filterButtonActive
+        ]}
+        onPress={() => setSelectedType(type)}
+      >
+        <Text style={[
+          styles.filterButtonText,
+          selectedType === type && styles.filterButtonTextActive
+        ]}>
+          {displayLabel}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
@@ -221,6 +226,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#e0e0e0',
+    minWidth: 60,
+    alignItems: 'center',
   },
   filterButtonActive: {
     backgroundColor: '#3498db',
@@ -230,6 +237,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#7f8c8d',
+    textAlign: 'center',
   },
   filterButtonTextActive: {
     color: 'white',

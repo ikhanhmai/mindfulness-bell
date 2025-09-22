@@ -227,7 +227,7 @@ export class NotificationManager {
     };
 
     // Extract bell event ID from notification identifier
-    if (response.identifier.startsWith('bell-')) {
+    if (response.identifier && response.identifier.startsWith('bell-')) {
       const bellEventId = response.identifier.replace('bell-', '');
       result.bellEventId = bellEventId;
 

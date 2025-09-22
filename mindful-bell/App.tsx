@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Platform, AppState as RNAppState, AppStateStatus, Linking } from 'react-native';
+import { Platform, AppState as RNAppState, AppStateStatus, Linking, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as Notifications from 'expo-notifications';
@@ -287,16 +287,17 @@ const App: React.FC = () => {
   };
 
   const MainApp = () => (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarStyle: {
-            paddingBottom: Platform.OS === 'ios' ? 20 : 5,
-            height: Platform.OS === 'ios' ? 80 : 60,
-          }
-        }}
-      >
+    <View style={{ flex: 1 }} testID="main-navigation">
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={{
+            headerShown: false,
+            tabBarStyle: {
+              paddingBottom: Platform.OS === 'ios' ? 20 : 5,
+              height: Platform.OS === 'ios' ? 80 : 60,
+            }
+          }}
+        >
         <Tab.Screen
           name="Home"
           component={HomeScreen}
@@ -326,7 +327,8 @@ const App: React.FC = () => {
           }}
         />
       </Tab.Navigator>
-    </NavigationContainer>
+      </NavigationContainer>
+    </View>
   );
 
   if (appState.isLoading) {

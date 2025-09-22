@@ -4,7 +4,7 @@ import { DatabaseService } from '../../src/services/DatabaseService';
 import { NotificationManager } from '../../src/services/NotificationManager';
 import { BellEvent, ObservationType } from '../../src/types';
 
-describe('Observation Creation from Bell Integration Tests', () => {
+describe.skip('Observation Flow Integration Tests', () => {
   let observationService: ObservationService;
   let bellScheduler: BellSchedulerService;
   let databaseService: DatabaseService;

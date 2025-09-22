@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Observation, ObservationType } from '../types';
 import { useObservationService } from './DatabaseContext';
 
@@ -12,11 +12,20 @@ interface UseObservationsOptions {
   autoLoad?: boolean;
 }
 
+interface CategoryCounts {
+  all: number;
+  desire: number;
+  fear: number;
+  affliction: number;
+  lesson: number;
+}
+
 interface UseObservationsResult {
   // Data
   observations: Observation[];
   totalCount: number;
   hasMore: boolean;
+  categoryCounts: CategoryCounts;
 
   // State
   isLoading: boolean;
@@ -63,6 +72,7 @@ export const useObservations = (options: UseObservationsOptions = {}): UseObserv
   } = options;
 
   const [observations, setObservations] = useState<Observation[]>([]);
+  const [allObservations, setAllObservations] = useState<Observation[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -76,6 +86,20 @@ export const useObservations = (options: UseObservationsOptions = {}): UseObserv
   const [currentSearch, setCurrentSearch] = useState<string | undefined>(search);
 
   const observationService = useObservationService();
+
+  // Load all observations for category counts (without filters)
+  const loadAllObservations = useCallback(async () => {
+    try {
+      const result = await observationService.getObservations({
+        limit: 1000, // Get a large number to ensure we get all
+        offset: 0
+        // No filters to get all observations for counts
+      });
+      setAllObservations(result.observations);
+    } catch (err) {
+      console.error('Failed to load all observations for category counts:', err);
+    }
+  }, [observationService]);
 
   const loadObservations = useCallback(async (append = false) => {
     try {
@@ -103,6 +127,11 @@ export const useObservations = (options: UseObservationsOptions = {}): UseObserv
       }
 
       setTotalCount(result.pagination.total);
+
+      // Load all observations for category counts if not appending
+      if (!append) {
+        await loadAllObservations();
+      }
     } catch (err) {
       console.error('Failed to load observations:', err);
       setError(err instanceof Error ? err.message : 'Failed to load observations');
@@ -117,7 +146,8 @@ export const useObservations = (options: UseObservationsOptions = {}): UseObserv
     currentType,
     currentDateFrom,
     currentDateTo,
-    currentSearch
+    currentSearch,
+    loadAllObservations
   ]);
 
   const loadMore = useCallback(async () => {
@@ -149,6 +179,7 @@ export const useObservations = (options: UseObservationsOptions = {}): UseObserv
 
       // Add to the beginning of the list
       setObservations(prev => [newObservation, ...prev]);
+      setAllObservations(prev => [newObservation, ...prev]);
       setTotalCount(prev => prev + 1);
 
       return newObservation;
@@ -171,6 +202,9 @@ export const useObservations = (options: UseObservationsOptions = {}): UseObserv
       setObservations(prev =>
         prev.map(obs => obs.id === id ? updatedObservation : obs)
       );
+      setAllObservations(prev =>
+        prev.map(obs => obs.id === id ? updatedObservation : obs)
+      );
 
       return updatedObservation;
     } catch (err) {
@@ -187,6 +221,7 @@ export const useObservations = (options: UseObservationsOptions = {}): UseObserv
 
       // Remove from the list
       setObservations(prev => prev.filter(obs => obs.id !== id));
+      setAllObservations(prev => prev.filter(obs => obs.id !== id));
       setTotalCount(prev => prev - 1);
     } catch (err) {
       console.error('Failed to delete observation:', err);
@@ -231,18 +266,39 @@ export const useObservations = (options: UseObservationsOptions = {}): UseObserv
     if (autoLoad) {
       loadObservations(false);
     }
-  }, [autoLoad, currentType, currentDateFrom, currentDateTo, currentSearch]);
+  }, [autoLoad, currentType, currentDateFrom, currentDateTo, currentSearch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed values
   const hasMore = observations.length < totalCount;
   const currentPage = Math.floor(currentOffset / limit) + 1;
   const totalPages = Math.ceil(totalCount / limit);
 
+  // Calculate category counts from all observations
+  const categoryCounts: CategoryCounts = useMemo(() => {
+    const counts = {
+      all: allObservations.length,
+      desire: 0,
+      fear: 0,
+      affliction: 0,
+      lesson: 0
+    };
+
+    allObservations.forEach(observation => {
+      if (observation.type === 'desire') counts.desire++;
+      else if (observation.type === 'fear') counts.fear++;
+      else if (observation.type === 'affliction') counts.affliction++;
+      else if (observation.type === 'lesson') counts.lesson++;
+    });
+
+    return counts;
+  }, [allObservations]);
+
   return {
     // Data
     observations,
     totalCount,
     hasMore,
+    categoryCounts,
 
     // State
     isLoading,

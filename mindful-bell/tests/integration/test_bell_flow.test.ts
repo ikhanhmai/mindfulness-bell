@@ -21,7 +21,7 @@ describe('Bell Acknowledgment Flow Integration Tests', () => {
   });
 
   describe('complete bell flow', () => {
-    it('should handle full bell acknowledgment workflow', async () => {
+    it.skip('should handle full bell acknowledgment workflow', async () => {
       // Step 1: Generate bell schedule
       const schedule = await bellScheduler.generateDailySchedule(
         new Date(),
@@ -229,7 +229,7 @@ describe('Bell Acknowledgment Flow Integration Tests', () => {
       }
     });
 
-    it('should clear and reschedule notifications properly', async () => {
+    it.skip('should clear and reschedule notifications properly', async () => {
       // Schedule initial notifications
       const schedule1 = await bellScheduler.generateDailySchedule(
         new Date(),

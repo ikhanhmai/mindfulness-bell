@@ -82,7 +82,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
           {!__DEV__ && (
             <Text style={styles.errorDescription}>
-              We're sorry, something unexpected happened. Please try again.
+              We&apos;re sorry, something unexpected happened. Please try again.
             </Text>
           )}
 

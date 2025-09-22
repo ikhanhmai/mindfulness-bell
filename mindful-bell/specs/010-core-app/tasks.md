@@ -116,6 +116,11 @@
 - [ ] T073 [P] Update UI text to be non-judgmental and supportive
 - [ ] T074 [P] Add observation deletion confirmation with undo toast
 - [ ] T075 [P] Implement search performance monitoring and optimization
+- [ ] T099 [P] Add category counts to filter buttons in ObservationsScreen
+- [ ] T100 [P] Update useObservations hook to calculate and provide category counts
+- [ ] T101 [P] Create TDD tests for category count functionality
+- [ ] T102 [P] Update ObservationsScreen UI to display counts in filter buttons
+- [ ] T103 [P] Style category buttons with count badges for improved UX
 
 ## Phase 3.13: Lessons System Implementation (From 013-lessons spec)
 - [ ] T076 [P] Create Lesson entity type and database schema

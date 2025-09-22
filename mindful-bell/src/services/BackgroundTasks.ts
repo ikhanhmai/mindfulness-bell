@@ -21,7 +21,7 @@ export class BackgroundTaskManager {
   private static instance: BackgroundTaskManager;
   private registeredTasks: Map<string, BackgroundTaskConfig> = new Map();
   private runningTasks: Set<string> = new Set();
-  private taskIntervals: Map<string, NodeJS.Timeout> = new Map();
+  private taskIntervals: Map<string, NodeJS.Timeout | number> = new Map();
 
   // Task names
   private static readonly DAILY_SCHEDULE_TASK = 'DAILY_BELL_SCHEDULE_GENERATION';

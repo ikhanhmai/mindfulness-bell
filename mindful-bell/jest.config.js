@@ -9,8 +9,11 @@ module.exports = {
     '**/?(*.)+(spec|test).tsx'
   ],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
-    '^.+\\.tsx$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: {
+        jsx: 'react-jsx',
+      },
+    }],
   },
   collectCoverageFrom: [
     'src/**/*.ts',
@@ -24,10 +27,13 @@ module.exports = {
     '^expo-notifications$': '<rootDir>/tests/__mocks__/expo-notifications.js',
     '^expo-sqlite$': '<rootDir>/tests/__mocks__/expo-sqlite.js',
     '^expo-router$': '<rootDir>/tests/__mocks__/expo-router.js',
+    '^expo-task-manager$': '<rootDir>/tests/__mocks__/expo-task-manager.js',
+    '^expo-background-fetch$': '<rootDir>/tests/__mocks__/expo-background-fetch.js',
     '^@react-navigation/native$': '<rootDir>/tests/__mocks__/react-navigation.js'
   },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   transformIgnorePatterns: [
-    'node_modules/(?!(expo|@expo|react-native|@react-native|expo-notifications|expo-sqlite|expo-router)/)'
+    'node_modules/(?!(expo|@expo|react-native|@react-native|expo-notifications|expo-sqlite|expo-router|expo-task-manager|expo-background-fetch|expo-modules-core)/)'
   ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testTimeout: 10000,
