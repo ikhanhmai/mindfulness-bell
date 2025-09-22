@@ -116,11 +116,11 @@
 - [ ] T073 [P] Update UI text to be non-judgmental and supportive
 - [ ] T074 [P] Add observation deletion confirmation with undo toast
 - [ ] T075 [P] Implement search performance monitoring and optimization
-- [ ] T099 [P] Add category counts to filter buttons in ObservationsScreen
-- [ ] T100 [P] Update useObservations hook to calculate and provide category counts
-- [ ] T101 [P] Create TDD tests for category count functionality
-- [ ] T102 [P] Update ObservationsScreen UI to display counts in filter buttons
-- [ ] T103 [P] Style category buttons with count badges for improved UX
+- [x] T099 [P] Add category counts to filter buttons in ObservationsScreen
+- [x] T100 [P] Update useObservations hook to calculate and provide category counts
+- [x] T101 [P] Create TDD tests for category count functionality
+- [x] T102 [P] Update ObservationsScreen UI to display counts in filter buttons
+- [x] T103 [P] Style category buttons with count badges for improved UX
 
 ## Phase 3.13: Lessons System Implementation (From 013-lessons spec)
 - [ ] T076 [P] Create Lesson entity type and database schema
@@ -269,18 +269,20 @@ T034: "StatsScreen implementation"
 
 1. **Cross-Platform Compatibility**: App works seamlessly on web browsers with graceful fallbacks
 2. **Robust Navigation**: Auto-navigation after observation save with comprehensive error handling
-3. **TDD Coverage**: 30+ integration tests ensuring reliability and preventing regressions
+3. **TDD Coverage**: 35+ integration tests ensuring reliability and preventing regressions
 4. **Web Fallbacks**: Complete NotificationManager fallback system for web platform
 5. **Data Persistence**: Works with SQLite on native and mock storage on web
-6. **Developer Experience**: Jest properly configured, dev server running, no blank page issues
+6. **Category Counts Feature**: Real-time observation counts in filter buttons (e.g., "Desires (5)")
+7. **Developer Experience**: Jest properly configured, dev server running, no blank page issues
 
 ### 📊 Test Results Summary
 ```
 ✅ Web Fallbacks: 13/13 tests passing
-✅ Navigation TDD: 11/11 tests passing  
+✅ Navigation TDD: 11/11 tests passing
 ✅ Quick Capture: 6/6 tests passing
 ✅ Contract Tests: 4/4 test suites passing
-✅ Total: 30+ tests passing across 11 test suites
+✅ Category Counts: 7/7 tests passing
+✅ Total: 35+ tests passing across 12 test suites
 ```
 
 ### 🚀 Production Readiness
