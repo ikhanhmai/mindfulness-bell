@@ -1,0 +1,334 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "EAS Build API Integration",
+    "description": "API contracts for automated iOS build and submission workflow",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.expo.dev",
+      "description": "EAS Production API"
+    }
+  ],
+  "paths": {
+    "/v2/projects/{projectId}/builds": {
+      "post": {
+        "summary": "Initiate Build",
+        "description": "Start a new iOS build with specified configuration",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuildRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Build initiated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid build configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          }
+        }
+      }
+    },
+    "/v2/projects/{projectId}/builds/{buildId}": {
+      "get": {
+        "summary": "Get Build Status",
+        "description": "Retrieve current status and details of a build",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "buildId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Build status retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildStatusResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Build not found"
+          }
+        }
+      }
+    },
+    "/v2/projects/{projectId}/submissions": {
+      "post": {
+        "summary": "Submit to App Store",
+        "description": "Submit build to App Store Connect",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Submission initiated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid submission data"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BuildRequest": {
+        "type": "object",
+        "required": ["platform", "profile"],
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": ["ios"]
+          },
+          "profile": {
+            "type": "string",
+            "enum": ["development", "preview", "production"]
+          },
+          "gitCommitHash": {
+            "type": "string",
+            "description": "Git commit to build from"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/BuildMetadata"
+          }
+        }
+      },
+      "BuildMetadata": {
+        "type": "object",
+        "properties": {
+          "buildNumber": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "appVersion": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          },
+          "distribution": {
+            "type": "string",
+            "enum": ["internal", "store"]
+          }
+        }
+      },
+      "BuildResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["queued", "in-progress", "finished", "errored"]
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["ios"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BuildStatusResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BuildResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "artifacts": {
+                "type": "object",
+                "properties": {
+                  "buildUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "applicationArchiveUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                }
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "errorCode": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "SubmissionRequest": {
+        "type": "object",
+        "required": ["buildId", "config"],
+        "properties": {
+          "buildId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "config": {
+            "$ref": "#/components/schemas/SubmissionConfig"
+          }
+        }
+      },
+      "SubmissionConfig": {
+        "type": "object",
+        "required": ["ascApiKeyId", "ascApiKeyIssuerId"],
+        "properties": {
+          "ascApiKeyId": {
+            "type": "string",
+            "description": "App Store Connect API Key ID"
+          },
+          "ascApiKeyIssuerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "API Key Issuer ID"
+          },
+          "ascAppId": {
+            "type": "string",
+            "description": "App Store Connect App ID"
+          }
+        }
+      },
+      "SubmissionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["in-progress", "finished", "errored"]
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              },
+              "details": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}

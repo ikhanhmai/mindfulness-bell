@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(.specify/scripts/bash/get-feature-paths.sh:*)",
+      "Bash(for dir in specs/*/)",
+      "Bash(do echo \"=== $dir ===\")",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(done)",
+      "Bash(npx expo run:*)",
+      "Bash(open ios/mindfulbell.xcworkspace)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh:*)",
+      "WebSearch",
+      "Bash(find:*)",
+      "WebFetch(domain:docs.expo.dev)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
