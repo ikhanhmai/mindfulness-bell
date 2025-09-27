@@ -1,0 +1,69 @@
+{
+  "cli": {
+    "version": ">= 8.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true,
+        "resourceClass": "medium",
+        "bundleIdentifier": "com.mindfulness.bell.dev"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.dev.mindfulness-app.com",
+        "EXPO_PUBLIC_ANALYTICS_ENABLED": "false",
+        "EXPO_PUBLIC_DEBUG_MODE": "true",
+        "EXPO_PUBLIC_WELLNESS_DISCLAIMER": "true",
+        "EXPO_PUBLIC_MEDICAL_DISCLAIMER": "This app is for development testing only"
+      }
+    },
+    "preview": {
+      "extends": "production",
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "medium",
+        "bundleIdentifier": "com.mindfulness.bell.preview"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.staging.mindfulness-app.com",
+        "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
+        "EXPO_PUBLIC_DEBUG_MODE": "false",
+        "EXPO_PUBLIC_WELLNESS_DISCLAIMER": "true",
+        "EXPO_PUBLIC_MEDICAL_DISCLAIMER": "This preview app is for testing purposes only and is not intended for medical use"
+      }
+    },
+    "production": {
+      "node": "18.18.0",
+      "ios": {
+        "resourceClass": "large",
+        "image": "macos-sonoma-14.6-xcode-16.1",
+        "bundleIdentifier": "com.mindfulness.bell"
+      },
+      "env": {
+        "NODE_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://api.mindfulness-app.com",
+        "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
+        "EXPO_PUBLIC_DEBUG_MODE": "false",
+        "EXPO_PUBLIC_WELLNESS_DISCLAIMER": "true",
+        "EXPO_PUBLIC_MEDICAL_DISCLAIMER": "This app is for general wellness purposes only and is not intended for medical diagnosis or treatment.",
+        "EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH": "1",
+        "EXPO_UNSTABLE_TREE_SHAKING": "1",
+        "EXPO_UNSTABLE_ATLAS": "true"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "$APPLE_DEVELOPER_EMAIL",
+        "ascAppId": "$ASC_APP_ID",
+        "appleTeamId": "$APPLE_TEAM_ID",
+        "ascApiKeyPath": "$ASC_API_KEY_PATH",
+        "ascApiKeyId": "$ASC_API_KEY_ID",
+        "ascApiKeyIssuerId": "$ASC_API_KEY_ISSUER_ID"
+      }
+    }
+  }
+}

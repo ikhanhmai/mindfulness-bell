@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mindful-bell",
+    "name": "Mindful Bell",
     "slug": "mindful-bell",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,9 +8,27 @@
     "scheme": "mindfulbell",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "description": "A mindfulness bell app for meditation practice. This app is for general wellness purposes only and is not intended for medical diagnosis or treatment.",
+    "keywords": ["mindfulness", "meditation", "bell", "wellness", "mental health"],
+    "privacy": "public",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.mindful-bell"
+      "bundleIdentifier": "com.mindfulness.bell",
+      "buildNumber": "1",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio", "background-fetch"],
+        "NSUserTrackingUsageDescription": "This app uses tracking to provide personalized meditation recommendations with your consent.",
+        "NSLocationWhenInUseUsageDescription": "Location access is used for mindful location-based reminders.",
+        "NSMicrophoneUsageDescription": "Microphone access is optional for guided meditation features.",
+        "CFBundleDisplayName": "Mindful Bell",
+        "CFBundleName": "Mindful Bell",
+        "NSHealthShareUsageDescription": "This app does not access health data - it is for general wellness purposes only.",
+        "NSHealthUpdateUsageDescription": "This app does not update health data - it is for general wellness purposes only."
+      },
+      "associatedDomains": ["applinks:mindfulness-app.com"],
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
