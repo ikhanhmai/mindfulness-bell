@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(.specify/scripts/bash/get-feature-paths.sh:*)",
+      "Bash(for dir in specs/*/)",
+      "Bash(do echo \"=== $dir ===\")",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(done)",
+      "Bash(npx expo run:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
