@@ -1,0 +1,468 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "App Store Connect API Integration",
+    "description": "API contracts for App Store Connect submission and metadata management",
+    "version": "3.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.appstoreconnect.apple.com",
+      "description": "App Store Connect API"
+    }
+  ],
+  "paths": {
+    "/v1/builds": {
+      "post": {
+        "summary": "Upload Build",
+        "description": "Upload app binary to App Store Connect",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuildUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Build uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid build data"
+          },
+          "401": {
+            "description": "Authentication failed"
+          }
+        }
+      }
+    },
+    "/v1/builds/{buildId}": {
+      "get": {
+        "summary": "Get Build Status",
+        "description": "Retrieve processing status of uploaded build",
+        "parameters": [
+          {
+            "name": "buildId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Build status retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/appStoreVersions": {
+      "post": {
+        "summary": "Create App Store Version",
+        "description": "Create new version for App Store submission",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppStoreVersionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Version created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppStoreVersionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/appStoreVersionSubmissions": {
+      "post": {
+        "summary": "Submit for Review",
+        "description": "Submit app version for App Store review",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Submitted for review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BuildUploadRequest": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": ["type", "attributes"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["builds"]
+              },
+              "attributes": {
+                "$ref": "#/components/schemas/BuildAttributes"
+              },
+              "relationships": {
+                "$ref": "#/components/schemas/BuildRelationships"
+              }
+            }
+          }
+        }
+      },
+      "BuildAttributes": {
+        "type": "object",
+        "required": ["version", "uploadedDate"],
+        "properties": {
+          "version": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+            "description": "App version in semantic format"
+          },
+          "uploadedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expirationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expired": {
+            "type": "boolean"
+          },
+          "minOsVersion": {
+            "type": "string",
+            "description": "Minimum iOS version (e.g., 15.0)"
+          },
+          "processingState": {
+            "type": "string",
+            "enum": ["PROCESSING", "FAILED", "INVALID", "VALID"]
+          }
+        }
+      },
+      "BuildRelationships": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["apps"]
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "App Store Connect App ID"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "BuildUploadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["builds"]
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "$ref": "#/components/schemas/BuildAttributes"
+              }
+            }
+          }
+        }
+      },
+      "BuildStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["builds"]
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BuildAttributes"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "iconAssetToken": {
+                        "type": "string"
+                      },
+                      "usesNonExemptEncryption": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "AppStoreVersionRequest": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": ["type", "attributes", "relationships"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["appStoreVersions"]
+              },
+              "attributes": {
+                "$ref": "#/components/schemas/AppStoreVersionAttributes"
+              },
+              "relationships": {
+                "$ref": "#/components/schemas/AppStoreVersionRelationships"
+              }
+            }
+          }
+        }
+      },
+      "AppStoreVersionAttributes": {
+        "type": "object",
+        "required": ["platform", "versionString"],
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": ["IOS"]
+          },
+          "versionString": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          },
+          "copyright": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "releaseType": {
+            "type": "string",
+            "enum": ["AFTER_APPROVAL", "MANUAL"]
+          },
+          "earliestReleaseDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AppStoreVersionRelationships": {
+        "type": "object",
+        "required": ["app"],
+        "properties": {
+          "app": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["apps"]
+                  },
+                  "id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "AppStoreVersionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["appStoreVersions"]
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AppStoreVersionAttributes"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "appStoreState": {
+                        "type": "string",
+                        "enum": [
+                          "READY_FOR_SALE",
+                          "PROCESSING_FOR_APP_STORE",
+                          "PENDING_APPLE_RELEASE",
+                          "PENDING_DEVELOPER_RELEASE"
+                        ]
+                      },
+                      "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "SubmissionRequest": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": ["type", "relationships"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["appStoreVersionSubmissions"]
+              },
+              "relationships": {
+                "type": "object",
+                "required": ["appStoreVersion"],
+                "properties": {
+                  "appStoreVersion": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": ["appStoreVersions"]
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "SubmissionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["appStoreVersionSubmissions"]
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "WAITING_FOR_REVIEW",
+                      "IN_REVIEW",
+                      "REJECTED",
+                      "ACCEPTED"
+                    ]
+                  },
+                  "submittedDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token generated from App Store Connect API private key"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}

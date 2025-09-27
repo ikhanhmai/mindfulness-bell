@@ -8,7 +8,13 @@
       "Bash(ls:*)",
       "Bash(grep:*)",
       "Bash(done)",
-      "Bash(npx expo run:*)"
+      "Bash(npx expo run:*)",
+      "Bash(open ios/mindfulbell.xcworkspace)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh:*)",
+      "WebSearch",
+      "Bash(find:*)",
+      "WebFetch(domain:docs.expo.dev)"
     ],
     "deny": [],
     "ask": []
